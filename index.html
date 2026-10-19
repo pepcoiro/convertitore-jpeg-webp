@@ -29,6 +29,11 @@ h1{margin:0 0 10px;font-size:30px;line-height:1.2;letter-spacing:-1.2px}
 h2{margin:0 0 10px;font-size:24px}
 p{font-family:"Jost",sans-serif;font-size:18px;font-weight:400;line-height:1.8;margin:0 0 16px}
 .converter{margin-top:36px}
+.conversion-choice{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);margin-bottom:20px}
+.conversion-option{padding:10px 8px;border:1px solid var(--line);border-bottom:0;background:transparent;color:var(--fg);font:inherit;font-size:16px;cursor:pointer;transition:background .2s,color .2s}
+.conversion-option+ .conversion-option{border-left:0}
+.conversion-option.selected{background:var(--fg);color:var(--bg)}
+.conversion-option:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
 .field label{display:block;font-size:15px;font-weight:300;color:var(--muted);margin-bottom:6px}
 .field input[type=number],.field input[type=text],.field select{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);font:inherit;padding:7px 0;outline-offset:3px}
 .field select option{background:var(--bg);color:var(--fg)}
@@ -66,7 +71,10 @@ output{font-size:15px;min-width:28px;text-align:right}
 <main>
   <header><a href="#">Convertitore Jpeg - Webp</a><button class="theme" id="theme" type="button" role="switch" aria-label="Cambia tema" aria-checked="false"></button></header>
   <section class="converter">
-    <div class="field" style="margin-bottom:20px"><label for="direction">Formato di conversione</label><select id="direction" style="width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);font:inherit;padding:8px 0"><option value="to-webp">Converti JPEG in WebP</option><option value="to-jpeg">Converti WebP in JPEG</option></select></div>
+    <div class="conversion-choice" role="group" aria-label="Formato di conversione">
+      <button class="conversion-option selected" id="toWebp" type="button" aria-pressed="true">JPEG <span aria-hidden="true">→</span> WebP</button>
+      <button class="conversion-option" id="toJpeg" type="button" aria-pressed="false">WebP <span aria-hidden="true">→</span> JPEG</button>
+    </div>
   
     <div class="drop" id="drop"><p id="droptext">Trascina qui i file JPG/JPEG oppure</p><button class="btn alt" id="choose" type="button">Scegli immagini</button><input id="picker" type="file" accept=".jpg,.jpeg,image/jpeg" multiple hidden></div>
   </section>
@@ -84,7 +92,9 @@ output{font-size:15px;min-width:28px;text-align:right}
 <script>
 (() => {
  const $=id=>document.getElementById(id), state=[];
- const drop=$('drop'), picker=$('picker'), direction=$('direction');
+ const drop=$('drop'), picker=$('picker');
+ let directionValue='to-webp';
+ const directionButtons=[$('toWebp'),$('toJpeg')];
  const root=document.documentElement, system=matchMedia('(prefers-color-scheme: dark)');
  function isDarkMode(){try{const manual=sessionStorage.getItem('theme');if(manual==='dark')return true;if(manual==='light')return false}catch{}return system.matches}
  function applyTheme(theme){root.classList.remove('dark','light');if(theme)root.classList.add(theme);$('theme').setAttribute('aria-checked',String(isDarkMode()))}
@@ -92,9 +102,11 @@ output{font-size:15px;min-width:28px;text-align:right}
  applyTheme(initialTheme);
  system.addEventListener('change',()=>{let saved=null;try{saved=sessionStorage.getItem('theme')}catch{}if(saved===null)applyTheme(null)});
  $('theme').addEventListener('click',()=>{document.body.style.transition='background .2s,color .2s';const next=isDarkMode()?'light':'dark';try{sessionStorage.setItem('theme',next)}catch{}applyTheme(next)});
- function isWebpOutput(){return direction.value==='to-webp'}
- function updateDirection(){const toWebp=isWebpOutput();picker.accept=toWebp?'.jpg,.jpeg,image/jpeg':'.webp,image/webp';$('droptext').textContent=toWebp?'Trascina qui i file JPG/JPEG oppure':'Trascina qui i file WebP oppure';state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'}
- direction.addEventListener('change',updateDirection);
+ function isWebpOutput(){return directionValue==='to-webp'}
+ function updateDirection(value=directionValue){directionValue=value;const toWebp=isWebpOutput();
+ directionButtons.forEach((button,index)=>{const selected=(index===0&&toWebp)||(index===1&&!toWebp);button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});picker.accept=toWebp?'.jpg,.jpeg,image/jpeg':'.webp,image/webp';$('droptext').textContent=toWebp?'Trascina qui i file JPG/JPEG oppure':'Trascina qui i file WebP oppure';state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'}
+ directionButtons[0].addEventListener('click',()=>updateDirection('to-webp'));
+ directionButtons[1].addEventListener('click',()=>updateDirection('to-jpeg'));
  $('choose').addEventListener('click',()=>picker.click());
  $('quality').addEventListener('input',()=> $('qout').value=$('quality').value);
  picker.addEventListener('change',e=>{addFiles([...e.target.files]);picker.value=''});
