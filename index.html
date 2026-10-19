@@ -42,8 +42,8 @@ h1{font-size:30px;line-height:1.2;letter-spacing:-1.2px;margin:0 0 10px;font-wei
  const root=document.documentElement, system=matchMedia('(prefers-color-scheme: dark)');
  function isDarkMode(){try{const manual=sessionStorage.getItem('theme');if(manual==='dark')return true;if(manual==='light')return false}catch{}return system.matches}
  function applyTheme(theme){root.classList.remove('dark','light');if(theme)root.classList.add(theme);$('theme').setAttribute('aria-checked',String(isDarkMode()))}
- try{const saved=sessionStorage.getItem('theme');if(saved==='dark'||saved==='light')root.classList.add(saved)}catch{}
- applyTheme(null);
+ let initialTheme=null;try{const saved=sessionStorage.getItem('theme');if(saved==='dark'||saved==='light')initialTheme=saved}catch{}
+ applyTheme(initialTheme);
  system.addEventListener('change',()=>{let saved=null;try{saved=sessionStorage.getItem('theme')}catch{}if(saved===null)applyTheme(null)});
  $('theme').addEventListener('click',()=>{document.body.style.transition='background .2s,color .2s';const next=isDarkMode()?'light':'dark';try{sessionStorage.setItem('theme',next)}catch{}applyTheme(next)});
  function isWebpOutput(){return direction.value==='to-webp'}
