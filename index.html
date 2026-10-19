@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Converti immagini JPEG in WebP direttamente nel browser.">
+<title>JPEG → WebP</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--fg:#171717;--muted:#777;--line:#e5e5e5;--hover:#f6f6f6;--ok:#267448;--error:#b42318}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#111;--fg:#f2f2f2;--muted:#999;--line:#303030;--hover:#1b1b1b;--ok:#75d69a;--error:#ff938a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Verdana,system-ui,sans-serif}main{width:min(100% - 36px,600px);margin:0 auto;padding:34px 0 50px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:58px}header a{color:inherit;text-decoration:none;font-weight:700;letter-spacing:-.03em}.theme{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:5px 0}h1{font-size:30px;line-height:1.2;letter-spacing:-1.2px;margin:0 0 10px;font-weight:700}p{margin:0;color:var(--muted)}.intro{margin-bottom:30px}.drop{border:1px dashed var(--line);padding:26px 20px;text-align:center;transition:background .15s,border-color .15s}.drop.drag{border-color:var(--fg);background:var(--hover)}.drop p{margin-bottom:15px}.btn{border:1px solid var(--fg);background:var(--fg);color:var(--bg);padding:9px 13px;font:inherit;font-size:13px;cursor:pointer}.btn:disabled{opacity:.35;cursor:default}.btn.alt{background:var(--bg);color:var(--fg)}.settings{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px;margin:25px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input[type=number],.field input[type=text]{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);font:inherit;padding:7px 0;outline-offset:3px}.range{display:flex;align-items:center;gap:10px}.range input{width:100%;accent-color:var(--fg)}output{font-size:13px;min-width:28px;text-align:right}.actions{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.summary{font-size:12px;color:var(--muted);margin:12px 0}.progress{height:2px;background:var(--line);margin-top:14px}.progress span{display:block;height:100%;width:0;background:var(--fg);transition:width .15s}.results{margin-top:34px}.results h2{font-size:15px;margin:0 0 10px}.file{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.filename{overflow-wrap:anywhere;font-size:13px}.meta,.status{font-size:11px;color:var(--muted)}.status{text-align:right}.status.good{color:var(--ok)}.status.bad{color:var(--error)}.download{display:inline-block;color:var(--fg);font-size:12px;margin-top:3px}.ziprow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px}.hidden{display:none!important}.foot{font-size:11px;color:var(--muted);margin-top:30px}
+@media(max-width:480px){main{width:calc(100% - 28px);padding-top:22px}header{margin-bottom:42px}h1{font-size:27px}.settings{gap:16px}.drop{padding:23px 12px}}
+</style>
+</head>
+<body>
+<main>
+  <header><a href="#">JPEG → WebP</a><button class="theme" id="theme" type="button">Tema scuro</button></header>
+  <section class="intro"><h1>Converti le tue immagini.</h1><p>JPG in WebP, direttamente nel browser. I file restano sul tuo dispositivo.</p></section>
+  <section>
+    <div class="drop" id="drop"><p>Trascina qui i file JPG oppure</p><button class="btn alt" id="choose" type="button">Scegli immagini</button><input id="picker" type="file" accept=".jpg,.jpeg,image/jpeg" multiple hidden></div>
+  </section>
+  <section class="settings" aria-label="Impostazioni">
+    <div class="field"><label for="maxmb">Dimensione massima (MB)</label><input id="maxmb" type="number" min="0.1" max="100" step="0.1" value="5"></div>
+    <div class="field"><label for="suffix">Suffisso (facoltativo)</label><input id="suffix" type="text" value="" maxlength="50" placeholder="_webp"></div>
+    <div class="field" style="grid-column:1/-1"><label for="quality">Qualità massima iniziale</label><div class="range"><input id="quality" type="range" min="10" max="100" value="85"><output id="qout">85</output></div></div>
+  </section>
+  <div class="actions"><button class="btn" id="convert" disabled type="button">Converti</button><button class="btn alt" id="clear" disabled type="button">Azzera</button></div>
+  <div id="summary" class="summary" aria-live="polite">Nessuna immagine selezionata.</div>
+  <div class="progress"><span id="overall"></span></div>
+  <section class="results hidden" id="resultsPanel"><h2>Risultati</h2><div id="results"></div><div class="ziprow"><span class="meta" id="zipstatus"></span><button class="btn alt" id="zip" disabled type="button">Scarica ZIP</button></div></section>
+  <p class="foot">Se il limite non è raggiungibile, anche alla qualità minima, il file viene segnalato. Gli originali non vengono modificati.</p>
+</main>
+<script>
+(() => {
+ const $=id=>document.getElementById(id), state=[];
+ const drop=$('drop'), picker=$('picker');
+ const savedTheme=localStorage.getItem('jpeg-webp-theme');
+ document.documentElement.dataset.theme=savedTheme==='dark'?'dark':'light';
+ function updateThemeLabel(){$('theme').textContent=document.documentElement.dataset.theme==='dark'?'Tema chiaro':'Tema scuro'}
+ updateThemeLabel();
+ $('theme').addEventListener('click',()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;try{localStorage.setItem('jpeg-webp-theme',next)}catch{}updateThemeLabel()});
+ $('choose').addEventListener('click',()=>picker.click());
+ $('quality').addEventListener('input',()=> $('qout').value=$('quality').value);
+ picker.addEventListener('change',e=>{addFiles([...e.target.files]);picker.value=''});
+ drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+ drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+ drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');addFiles([...e.dataTransfer.files])});
+ $('clear').addEventListener('click',()=>{state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'});
+ $('convert').addEventListener('click',convertAll);$('zip').addEventListener('click',downloadZip);
+ function addFiles(files){const accepted=files.filter(f=>/\.jpe?g$/i.test(f.name)||f.type==='image/jpeg');for(const file of accepted){if(state.some(x=>x.file.name===file.name&&x.file.size===file.size&&x.file.lastModified===file.lastModified))continue;state.push({file,status:'In attesa',blob:null,outputName:'',originalUrl:URL.createObjectURL(file)})}render();if(files.length&&!accepted.length)$('summary').textContent='Seleziona file JPG o JPEG.'}
+ function fmt(bytes){return (bytes/1048576).toFixed(2)+' MB'}
+ function render(){ $('convert').disabled=!state.length;$('clear').disabled=!state.length;$('summary').textContent=state.length?`${state.length} ${state.length===1?'immagine selezionata':'immagini selezionate'}.`:'Nessuna immagine selezionata.';const list=$('results');list.replaceChildren();state.forEach(item=>{const row=document.createElement('div');row.className='file';const left=document.createElement('div');const name=document.createElement('div');name.className='filename';name.textContent=item.outputName||item.file.name;const meta=document.createElement('div');meta.className='meta';meta.textContent=item.blob?`${fmt(item.file.size)} → ${fmt(item.blob.size)} · qualità ${item.quality}`:`Originale · ${fmt(item.file.size)}`;left.append(name,meta);const right=document.createElement('div');right.className='status'+(item.blob?' good':item.status.startsWith('Errore')?' bad':'');right.textContent=item.status;if(item.blob){const a=document.createElement('a');a.className='download';a.href=item.blobUrl;a.download=item.outputName;a.textContent='Scarica';right.append(document.createElement('br'),a)}row.append(left,right);list.append(row)});$('resultsPanel').classList.toggle('hidden',!state.length);$('zip').disabled=!state.some(x=>x.blob)}
+ function loadImage(file){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Impossibile leggere l’immagine'));img.src=URL.createObjectURL(file)})}
+ function toWebp(img,q){return new Promise((resolve,reject)=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);canvas.toBlob(blob=>{canvas.width=canvas.height=0;if(!blob||blob.type!=='image/webp')reject(new Error('WebP non supportato dal browser'));else resolve(blob)},'image/webp',q/100)})}
+ async function convertOne(item,maxBytes,maxQ){const img=await loadImage(item.file);let low=10,high=maxQ,best=null,bestQ=null;const first=await toWebp(img,maxQ);if(first.size<=maxBytes){best=first;bestQ=maxQ}else{while(low<=high){const mid=Math.floor((low+high)/2),blob=await toWebp(img,mid);if(blob.size<=maxBytes){best=blob;bestQ=mid;low=mid+1}else high=mid-1}if(!best){best=await toWebp(img,10);bestQ=10}}const suffix=$('suffix').value;item.outputName=item.file.name.replace(/\.jpe?g$/i,'')+suffix+'.webp';item.blob=best;item.blobUrl=URL.createObjectURL(best);item.quality=bestQ;item.status=best.size>maxBytes?'Limite superato':'Completato'}
+ async function convertAll(){const maxMB=Number($('maxmb').value),quality=Number($('quality').value);if(!Number.isFinite(maxMB)||maxMB<=0){$('summary').textContent='Inserisci una dimensione valida.';return}$('convert').disabled=true;$('zip').disabled=true;state.forEach(x=>{x.blob=null;x.status='In elaborazione'});render();let done=0,errors=0;for(const item of state){try{await convertOne(item,maxMB*1048576,quality)}catch(e){item.status='Errore';item.error=e.message;errors++}done++;$('overall').style.width=`${done/state.length*100}%`;render()}$('convert').disabled=false;$('summary').textContent=`Completate ${done-errors} di ${done}${errors?` · Errori ${errors}`:''}.`;}
+ async function downloadZip(){const files=state.filter(x=>x.blob);if(!files.length)return;$('zip').disabled=true;$('zipstatus').textContent='Preparo lo ZIP…';try{if(!window.JSZip)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=resolve;s.onerror=reject;document.head.append(s)});const zip=new JSZip(),used=new Set();files.forEach(x=>{let name=x.outputName,n=1;while(used.has(name.toLowerCase())){const dot=x.outputName.lastIndexOf('.');name=x.outputName.slice(0,dot)+`_${n++}`+x.outputName.slice(dot)}used.add(name.toLowerCase());zip.file(name,x.blob)});const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='immagini-webp.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);$('zipstatus').textContent='';}catch(e){$('zipstatus').textContent='ZIP non disponibile: scarica i file singolarmente.'}finally{$('zip').disabled=!state.some(x=>x.blob)}}
+ render();
+})();
+</script>
+</body>
+</html>
