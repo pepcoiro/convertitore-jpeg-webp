@@ -1,27 +1,20 @@
 # Convertitore JPEG → WebP
 
-Utility web minimale per convertire immagini JPG/JPEG in WebP direttamente nel browser, con tema chiaro/scuro manuale.
+Strumento gratuito e minimale per convertire immagini JPG/JPEG in WebP direttamente dal browser, senza caricare le foto su un server.
 
-## Utilizzo
+### Funzioni
 
-1. Apri `index.html` in un browser moderno oppure visita la versione pubblicata con GitHub Pages.
-2. Seleziona o trascina uno o più file JPG/JPEG.
-3. Imposta la dimensione massima per immagine (predefinita: 5 MB), la qualità iniziale e un suffisso facoltativo.
-4. Premi **Converti**. Scarica ogni file singolarmente oppure tutti insieme in un archivio ZIP.
+- Conversione di più immagini in una volta.
+- Dimensione massima desiderata per file, con valore predefinito di 5 MB.
+- Qualità regolabile e riduzione automatica per rispettare il limite impostato.
+- Download dei file singoli o di tutte le immagini in un archivio ZIP.
+- Tema chiaro e scuro.
 
-## Pubblicare con GitHub Pages
+### Come si usa
 
-Nel repository, apri **Settings → Pages**. In **Build and deployment**, scegli **Deploy from a branch**, seleziona il branch `main` e la cartella `/(root)`, poi salva. Al termine della pubblicazione GitHub mostrerà l'indirizzo del sito nella stessa sezione.
+1. Apri il convertitore nel browser.
+2. Seleziona o trascina i file JPG/JPEG.
+3. Imposta dimensione massima e qualità, se necessario.
+4. Avvia la conversione e scarica i risultati.
 
-## Privacy e limiti
-
-- La conversione avviene sul dispositivo: le immagini non vengono caricate su un server.
-- Per creare lo ZIP viene caricata su richiesta la libreria JSZip da cdnjs. Se non hai una connessione, puoi comunque scaricare i file uno alla volta.
-- Il browser deve supportare l'esportazione WebP.
-- Il limite di dimensione è un obiettivo: se non è raggiungibile nemmeno alla qualità minima, il risultato viene segnalato.
-- Gli originali non vengono modificati.
-
-## File
-
-- `index.html` — applicazione completa (HTML, CSS e JavaScript).
-- `README.md` — istruzioni per l'uso e la pubblicazione.
+La conversione avviene sul tuo dispositivo e gli originali restano invariati. Per scaricare tutte le immagini in ZIP è necessaria una connessione Internet; i file singoli possono essere scaricati anche senza connessione.
