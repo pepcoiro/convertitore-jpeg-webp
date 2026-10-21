@@ -5,59 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Convertitore Jpeg - Webp">
 <title>Convertitore Jpeg - Webp</title>
-<style>
-@import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
-
-html{scrollbar-gutter:stable}
-:root{color-scheme:dark;--bg:#161616;--fg:#e5e5e2;--muted:#a0a09d;--line:rgba(229,229,226,.28);--hover:rgba(229,229,226,.07);--ok:#e5e5e2;--error:#e5e5e2}
-*{box-sizing:border-box}
-body{font-family:"Jost",sans-serif;font-size:18px;font-weight:400;line-height:1.8;margin:0;padding:36px 24px;background:var(--bg);color:var(--fg);transition:background .2s,color .2s}
-main{width:min(100%,600px);margin:0 auto;padding:0 0 30px}
-header{max-width:600px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
-header a{color:var(--fg);text-decoration:none;font-family:"Jost",sans-serif;font-size:30px;font-weight:600;letter-spacing:-.03em;transition:opacity .2s}
-header a:hover{opacity:.7}
-h1,h2,h3{font-family:"Jost",sans-serif;font-weight:600}
-h1{margin:0 0 10px;font-size:30px;line-height:1.2;letter-spacing:-1.2px}
-h2{margin:0 0 10px;font-size:24px}
-p{font-family:"Jost",sans-serif;font-size:18px;font-weight:400;line-height:1.8;margin:0 0 16px}
-.converter{margin-top:36px}
-.conversion-choice{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);margin-bottom:20px}
-.conversion-option{padding:10px 8px;border:1px solid var(--line);border-bottom:0;background:transparent;color:var(--fg);font:inherit;font-size:16px;cursor:pointer;transition:background .2s,color .2s}
-.conversion-option+ .conversion-option{border-left:0}
-.conversion-option.selected{background:var(--fg);color:var(--bg)}
-.conversion-option:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
-.field label{display:block;font-size:15px;font-weight:300;color:var(--muted);margin-bottom:6px}
-.field input[type=number],.field input[type=text],.field select{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);font:inherit;padding:7px 0;outline-offset:3px}
-.field select option{background:var(--bg);color:var(--fg)}
-.drop{border:1px dashed var(--line);padding:26px 20px;text-align:center;transition:background .2s,border-color .2s}
-.drop.drag{border-color:var(--fg);background:var(--hover)}
-.drop p{margin-bottom:15px}
-.btn{border:1px solid var(--fg);border-radius:0;background:var(--fg);color:var(--bg);padding:7px 12px;font-family:"Jost",sans-serif;font-size:15px;font-weight:400;cursor:pointer;transition:opacity .2s}
-.btn:hover{opacity:.7}
-.btn:disabled{opacity:.35;cursor:default}
-.btn.alt{background:transparent;color:var(--fg)}
-.settings{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px;margin:24px 0}
-.range{display:flex;align-items:center;gap:10px}
-.range input{width:100%;accent-color:var(--fg)}
-output{font-size:15px;min-width:28px;text-align:right}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}
-.summary{font-size:14px;color:var(--muted);margin:12px 0}
-.progress{height:2px;background:var(--line);margin-top:14px}
-.progress span{display:block;height:100%;width:0;background:var(--fg);transition:width .15s}
-.results{margin-top:34px}
-.results h2{font-size:24px;margin:0 0 10px}
-.file{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.filename{overflow-wrap:anywhere;font-size:16px}
-.meta,.status{font-size:14px;color:var(--muted)}
-.status{text-align:right}
-.status.good,.status.bad{color:var(--fg)}
-.download{display:inline-block;color:var(--fg);font-size:15px;margin-top:3px}
-.download:hover{opacity:.7}
-.ziprow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:15px}
-.hidden{display:none!important}
-.foot{font-size:14px;font-weight:300;color:var(--muted);margin-top:30px}
-@media(max-width:600px){body{padding:24px 18px}header a{font-size:27px}.converter{margin-top:30px}.settings{gap:16px}.drop{padding:23px 12px}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <main>
@@ -81,35 +29,6 @@ output{font-size:15px;min-width:28px;text-align:right}
   <section class="results hidden" id="resultsPanel"><h2>Risultati</h2><div id="results"></div><div class="ziprow"><span class="meta" id="zipstatus"></span><button class="btn alt" id="zip" disabled type="button">Scarica ZIP</button></div></section>
   <p class="foot">Se il limite non è raggiungibile, anche alla qualità minima, il file viene segnalato. Gli originali non vengono modificati.</p>
 </main>
-<script>
-(() => {
- const $=id=>document.getElementById(id), state=[];
- const drop=$('drop'), picker=$('picker');
- let directionValue='to-webp';
- const directionButtons=[$('toWebp'),$('toJpeg')];
- function isWebpOutput(){return directionValue==='to-webp'}
- function updateDirection(value=directionValue){directionValue=value;const toWebp=isWebpOutput();
- directionButtons.forEach((button,index)=>{const selected=(index===0&&toWebp)||(index===1&&!toWebp);button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});picker.accept=toWebp?'.jpg,.jpeg,image/jpeg':'.webp,image/webp';$('droptext').textContent=toWebp?'Trascina qui i file JPG/JPEG oppure':'Trascina qui i file WebP oppure';state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'}
- directionButtons[0].addEventListener('click',()=>updateDirection('to-webp'));
- directionButtons[1].addEventListener('click',()=>updateDirection('to-jpeg'));
- $('choose').addEventListener('click',()=>picker.click());
- $('quality').addEventListener('input',()=> $('qout').value=$('quality').value);
- picker.addEventListener('change',e=>{addFiles([...e.target.files]);picker.value=''});
- drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
- drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
- drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');addFiles([...e.dataTransfer.files])});
- $('clear').addEventListener('click',()=>{state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'});
- $('convert').addEventListener('click',convertAll);$('zip').addEventListener('click',downloadZip);
- function addFiles(files){const accepted=files.filter(f=>isWebpOutput()?(/\.jpe?g$/i.test(f.name)||f.type==='image/jpeg'):(/\.webp$/i.test(f.name)||f.type==='image/webp'));for(const file of accepted){if(state.some(x=>x.file.name===file.name&&x.file.size===file.size&&x.file.lastModified===file.lastModified))continue;state.push({file,status:'In attesa',blob:null,outputName:'',originalUrl:URL.createObjectURL(file)})}render();if(files.length&&!accepted.length)$('summary').textContent=isWebpOutput()?'Seleziona file JPG o JPEG.':'Seleziona file WebP.'}
- function fmt(bytes){return (bytes/1048576).toFixed(2)+' MB'}
- function render(){ $('convert').disabled=!state.length;$('clear').disabled=!state.length;$('summary').textContent=state.length?`${state.length} ${state.length===1?'immagine selezionata':'immagini selezionate'}.`:'Nessuna immagine selezionata.';const list=$('results');list.replaceChildren();state.forEach(item=>{const row=document.createElement('div');row.className='file';const left=document.createElement('div');const name=document.createElement('div');name.className='filename';name.textContent=item.outputName||item.file.name;const meta=document.createElement('div');meta.className='meta';meta.textContent=item.blob?`${fmt(item.file.size)} → ${fmt(item.blob.size)} · qualità ${item.quality}`:`Originale · ${fmt(item.file.size)}`;left.append(name,meta);const right=document.createElement('div');right.className='status'+(item.blob?' good':item.status.startsWith('Errore')?' bad':'');right.textContent=item.status;if(item.blob){const a=document.createElement('a');a.className='download';a.href=item.blobUrl;a.download=item.outputName;a.textContent='Scarica';right.append(document.createElement('br'),a)}row.append(left,right);list.append(row)});$('resultsPanel').classList.toggle('hidden',!state.length);$('zip').disabled=!state.some(x=>x.blob)}
- function loadImage(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Impossibile leggere l’immagine'))};img.src=url})}
- function encodeImage(img,q,type){return new Promise((resolve,reject)=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');if(type==='image/jpeg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.drawImage(img,0,0);canvas.toBlob(blob=>{canvas.width=canvas.height=0;if(!blob||blob.type!==type)reject(new Error('Formato non supportato dal browser'));else resolve(blob)},type,q/100)})}
- async function convertOne(item,maxBytes,maxQ){const img=await loadImage(item.file),type=isWebpOutput()?'image/webp':'image/jpeg',ext=isWebpOutput()?'.webp':'.jpg';let low=10,high=maxQ,best=null,bestQ=null;const first=await encodeImage(img,maxQ,type);if(first.size<=maxBytes){best=first;bestQ=maxQ}else{while(low<=high){const mid=Math.floor((low+high)/2),blob=await encodeImage(img,mid,type);if(blob.size<=maxBytes){best=blob;bestQ=mid;low=mid+1}else high=mid-1}if(!best){best=await encodeImage(img,10,type);bestQ=10}}const suffix=$('suffix').value;item.outputName=item.file.name.replace(/\.(jpe?g|webp)$/i,'')+suffix+ext;item.blob=best;item.blobUrl=URL.createObjectURL(best);item.quality=bestQ;item.status=best.size>maxBytes?'Limite superato':'Completato'}
- async function convertAll(){const maxMB=Number($('maxmb').value),quality=Number($('quality').value);if(!Number.isFinite(maxMB)||maxMB<0.1||maxMB>100){$('summary').textContent='Inserisci una dimensione tra 0,1 e 100 MB.';return}$('convert').disabled=true;$('zip').disabled=true;state.forEach(x=>{if(x.blobUrl)URL.revokeObjectURL(x.blobUrl);x.blobUrl=null;x.blob=null;x.status='In elaborazione'});render();let done=0,errors=0;for(const item of state){try{await convertOne(item,maxMB*1048576,quality)}catch(e){item.status='Errore';item.error=e.message;errors++}done++;$('overall').style.width=`${done/state.length*100}%`;render()}$('convert').disabled=false;$('summary').textContent=`Completate ${done-errors} di ${done}${errors?` · Errori ${errors}`:''}.`;}
- async function downloadZip(){const files=state.filter(x=>x.blob);if(!files.length)return;$('zip').disabled=true;$('zipstatus').textContent='Preparo lo ZIP…';try{if(!window.JSZip)await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';s.onload=resolve;s.onerror=reject;document.head.append(s)});const zip=new JSZip(),used=new Set();files.forEach(x=>{let name=x.outputName,n=1;while(used.has(name.toLowerCase())){const dot=x.outputName.lastIndexOf('.');name=x.outputName.slice(0,dot)+`_${n++}`+x.outputName.slice(dot)}used.add(name.toLowerCase());zip.file(name,x.blob)});const blob=await zip.generateAsync({type:'blob'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=isWebpOutput()?'immagini-webp.zip':'immagini-jpeg.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);$('zipstatus').textContent='';}catch(e){$('zipstatus').textContent='ZIP non disponibile: scarica i file singolarmente.'}finally{$('zip').disabled=!state.some(x=>x.blob)}}
- updateDirection();render();
-})();
-</script>
+<script src="script.js" defer></script>
 </body>
 </html>
