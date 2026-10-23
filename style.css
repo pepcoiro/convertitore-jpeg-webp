@@ -54,3 +54,6 @@ output{font-size:15px;min-width:28px;text-align:right}
 .site-footer{width:min(100%,600px);margin:24px auto 0;padding-top:12px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
 .site-footer a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .site-footer a:hover{opacity:.7}
+
+
+.conversion-icon{width:17px;height:17px;display:inline-block;vertical-align:-3px;margin:0 5px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
