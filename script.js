@@ -1,16 +1,18 @@
 (() => {
  const $=id=>document.getElementById(id), state=[];
- const drop=$('drop'), picker=$('picker');
+ const drop=$('drop'), picker=$('picker'), folderPicker=$('folderPicker');
  let directionValue='to-webp';
  const directionButtons=[$('toWebp'),$('toJpeg')];
  function isWebpOutput(){return directionValue==='to-webp'}
  function updateDirection(value=directionValue){directionValue=value;const toWebp=isWebpOutput();
- directionButtons.forEach((button,index)=>{const selected=(index===0&&toWebp)||(index===1&&!toWebp);button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});picker.accept=toWebp?'.jpg,.jpeg,image/jpeg':'.webp,image/webp';$('droptext').textContent=toWebp?'Trascina qui i file JPG/JPEG oppure':'Trascina qui i file WebP oppure';state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'}
+ directionButtons.forEach((button,index)=>{const selected=(index===0&&toWebp)||(index===1&&!toWebp);button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});picker.accept=toWebp?'.jpg,.jpeg,image/jpeg':'.webp,image/webp';folderPicker.accept=picker.accept;$('droptext').textContent=toWebp?'Trascina qui i file JPG/JPEG oppure':'Trascina qui i file WebP oppure';state.forEach(x=>{URL.revokeObjectURL(x.originalUrl);if(x.blobUrl)URL.revokeObjectURL(x.blobUrl)});state.splice(0);render();$('overall').style.width='0';$('summary').textContent='Nessuna immagine selezionata.'}
  directionButtons[0].addEventListener('click',()=>updateDirection('to-webp'));
  directionButtons[1].addEventListener('click',()=>updateDirection('to-jpeg'));
+ $('chooseFolder').addEventListener('click',()=>folderPicker.click());
  $('choose').addEventListener('click',()=>picker.click());
  $('quality').addEventListener('input',()=> $('qout').value=$('quality').value);
  picker.addEventListener('change',e=>{addFiles([...e.target.files]);picker.value=''});
+ folderPicker.addEventListener('change',e=>{addFiles([...e.target.files]);folderPicker.value=''});
  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
  drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
  drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag');addFiles([...e.dataTransfer.files])});
