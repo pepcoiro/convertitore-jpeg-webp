@@ -1,10 +1,11 @@
-# Convertitore immagini JPEG ↔ WebP
+# Convertitore immagini JPEG / PNG → WebP e WebP → JPEG
 
 Strumento gratuito e minimale per convertire immagini JPEG in WebP e WebP in JPEG direttamente dal browser, senza caricare le foto su un server.
 
 ### Funzioni
 
-- Conversione in entrambe le direzioni: JPEG → WebP e WebP → JPEG.
+- Conversione da JPEG e PNG a WebP.
+- Conversione da WebP a JPEG.
 - Conversione di più immagini in una volta.
 - Dimensione massima desiderata per file e qualità regolabile.
 - Download dei file singoli o di tutte le immagini in un archivio ZIP.
@@ -12,7 +13,7 @@ Strumento gratuito e minimale per convertire immagini JPEG in WebP e WebP in JPE
 
 ### Come si usa
 
-1. Scegli la direzione della conversione.
+1. Scegli la direzione della conversione: JPEG / PNG → WebP oppure WebP → JPEG.
 2. Seleziona o trascina le immagini.
 3. Imposta dimensione massima e qualità, se necessario.
 4. Avvia la conversione e scarica i risultati.
